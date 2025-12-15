@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Romantic Memory Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #ffd6e8, #ffe6f2);
+      position: relative;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    button.back-btn {
+      position: absolute;
+      left: 15px;
+      top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: #ff3366;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      z-index: 2;
+    }
+    h1, h2 {
+      color: #ff3366;
+      margin: 5px 0;
+      position: relative;
+      z-index: 1;
+      margin-top: 50px;
+    }
+    #game {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      grid-gap: 10px;
+      justify-content: center;
+      display: none; /* Hide game until start */
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .card {
+      width: 80px;
+      height: 80px;
+      background: #ff3366;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.5s ease;
+    }
+    .card.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .flipped {
+      background: #ff6699;
+    }
+    .matched {
+      visibility: hidden;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    .modal-content {
+      background: #ff3366;
+      padding: 25px;
+      border-radius: 15px;
+      color: white;
+      text-align: center;
+      font-size: 20px;
+    }
+    .modal-content a {
+      color: white;
+      text-decoration: underline;
+      cursor: pointer;
+      margin: 0 10px;
+    }
+    #startOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 214, 233, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+      flex-direction: column;
+    }
+    #startOverlay button {
+      padding: 15px 30px;
+      font-size: 24px;
+      border: none;
+      border-radius: 15px;
+      background: #ff3366;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="startOverlay">
+    <h2>Romantic Memory Game 💖</h2>
+    <button id="startBtn">Tap to Start</button>
+  </div>
+
+  <button class="back-btn" onclick="location.href='gallery.html'">⬅ Back</button>
+  <div id="game"></div>
+
+  <div class="modal" id="endModal">
+    <div class="modal-content" id="modalText"></div>
+  </div>
+
+  <audio id="backgroundMusic" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
+
+<script>
+    const allEmojis = ["❤️","🌹","🍫","💋","🥰","💌","🌸","🎁","😍","💖"];
+    const game = document.getElementById("game");
+    let flippedCards = [];
+    let matchedPairs = 0;
+    const backgroundMusic = document.getElementById("backgroundMusic");
+    const modal = document.getElementById("endModal");
+    const modalText = document.getElementById("modalText");
+    const startOverlay = document.getElementById("startOverlay");
+    const startBtn = document.getElementById("startBtn");
+
+    startBtn.addEventListener("click", startGame);
+
+    function startGame() {
+      startOverlay.style.display = "none";
+      game.style.display = "grid";
+      fadeInGame();
+      playMusicFadeIn();
+      initializeCards();
+    }
+
+    function fadeInGame() {
+      setTimeout(() => game.style.opacity = 1, 100);
+    }
+
+    function playMusicFadeIn() {
+      backgroundMusic.volume = 0;
+      backgroundMusic.play().catch(() => {});
+      let vol = 0;
+      const fade = setInterval(() => {
+        if (vol < 1) {
+          vol += 0.05;
+          backgroundMusic.volume = vol;
+        } else {
+          clearInterval(fade);
+        }
+      }, 100);
+    }
+
+    function initializeCards() {
+      // Pick 8 random emojis
+      const shuffled = allEmojis.sort(() => 0.5 - Math.random());
+      const emojis = shuffled.slice(0,8);
+      const symbols = [...emojis, ...emojis]; // duplicate for pairs
+      symbols.sort(() => Math.random() - 0.5); // shuffle all cards
+
+      symbols.forEach((sym, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.index = index;
+        card.textContent = "?";
+        card.onclick = () => flipCard(card, sym);
+        game.appendChild(card);
+        setTimeout(() => card.classList.add("show"), 100 * index); // staggered fade-in
+      });
+    }
+
+    function flipCard(card, symbol) {
+      if (flippedCards.length < 2 &&
+          !card.classList.contains("flipped") &&
+          !card.classList.contains("matched")) {
+
+        card.textContent = symbol;
+        card.classList.add("flipped");
+        flippedCards.push({ card, symbol });
+
+        if (flippedCards.length === 2) {
+          if (flippedCards[0].symbol === flippedCards[1].symbol) {
+            setTimeout(() => {
+              flippedCards[0].card.classList.add("matched");
+              flippedCards[1].card.classList.add("matched");
+              matchedPairs++;
+              flippedCards = [];
+              if (matchedPairs === 8) {
+                modal.style.display = "flex";
+                modalText.innerHTML = `
+                  <p>🎉 Congratulations! You matched all cards!</p>
+                  <p><a onclick="location.reload()">Replay</a> | <a onclick="exitGame()">Exit</a></p>
+                `;
+              }
+            }, 1000);
+          } else {
+            setTimeout(() => {
+              flippedCards[0].card.textContent = "?";
+              flippedCards[1].card.textContent = "?";
+              flippedCards[0].card.classList.remove("flipped");
+              flippedCards[1].card.classList.remove("flipped");
+              flippedCards = [];
+            }, 1000);
+          }
+        }
+      }
+    }
+
+    function exitGame() {
+      fadeOutMusic();
+      modalText.innerHTML = "<p>Thank you for playing ❤️</p>";
+      setTimeout(() => {
+        location.href = "gallery.html";
+      }, 2000);
+    }
+
+    function fadeOutMusic() {
+      let vol = backgroundMusic.volume;
+      const fade = setInterval(() => {
+        if (vol > 0) {
+          vol -= 0.05;
+          backgroundMusic.volume = vol;
+        } else {
+          backgroundMusic.pause();
+          backgroundMusic.currentTime = 0;
+          clearInterval(fade);
+        }
+      }, 100);
+    }
+  </script>
+</body>
+</html>

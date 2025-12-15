@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Happy Birthday Darling 🎂🎈</title>
+
+<style>
+/* -------- GENERAL BODY -------- */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  overflow-x: hidden;
+  background: #fff1f6;
+}
+
+/* -------- LOCK SCREEN -------- */
+#lockScreen {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:#ffe6f2;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  z-index:4000;
+}
+#lockScreen input {
+  padding:12px;
+  font-size:18px;
+  border-radius:8px;
+  border:2px solid #ff4d88;
+  width:220px;
+  text-align:center;
+  margin-top:10px;
+  transition: box-shadow .2s;
+}
+#lockScreen input.shake {
+  animation: shakeAnim 0.5s;
+  border-color: #cc1f52;
+  box-shadow: 0 6px 18px rgba(204,31,82,0.25);
+}
+@keyframes shakeAnim {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+#lockScreen button {
+  margin-top:15px;
+  padding:10px 20px;
+  font-size:17px;
+  border:none;
+  background:#ff4d88;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+#error {
+  margin-top:10px;
+  color:#660022;
+  font-weight:bold;
+  display:none;
+}
+
+/* -------- SPLASH -------- */
+#splash {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, #ffb6d5, #ffe2f1);
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* ADD THIS LINE */
+  z-index: 3000;
+}
+#splash h1 {
+  font-size: 36px;
+  color: #ff2d78;
+  margin:0;
+  padding:0;
+  animation: glow 1.6s ease-in-out infinite alternate;
+}
+@keyframes glow {
+  from { text-shadow: 0 0 6px rgba(255,45,120,0.6); transform: scale(1); }
+  to   { text-shadow: 0 0 24px rgba(255,45,120,0.95); transform: scale(1.02); }
+}
+
+/* -------- TYPEWRITER -------- */
+.typewriter {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 24px;
+  color: #ff3e88;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid #ff3e88;
+  width: 0;
+  animation: typing 4s steps(30) 1 forwards, blink .6s infinite;
+  animation-play-state: paused;
+}
+@keyframes typing { from { width:0; } to { width:100%; } }
+@keyframes blink { 50% { border-color: transparent; } }
+
+/* -------- MAIN CONTENT -------- */
+#mainContent { opacity:0; transition: opacity .6s ease; }
+#mainContent.visible { opacity:1; }
+
+/* -------- MAIN PHOTO -------- */
+#mainPhoto {
+  display:block;
+  margin: 20px auto;
+  max-width:70%;
+  max-height:250px;
+  border-radius:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.2);
+  cursor:pointer;
+  transition: transform .3s ease;
+}
+
+#mainPhoto:hover { transform: scale(1.05); }
+
+/* -------- STICKY NOTES -------- */
+.notes-container {
+  width:90%;
+  margin:auto;
+  margin-top:20px;
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:18px;
+}
+.note, .rect-note {
+  position: relative;
+  padding:10px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  cursor:pointer;
+  transition: transform .25s ease, opacity .8s ease;
+  box-shadow:0 6px 12px rgba(0,0,0,0.08);
+}
+.note {
+  background:#fff6a8;
+  height:150px;
+  font-size:16px;
+}
+.rect-note {
+  height:160px;
+  font-size:17px;
+  font-weight:500;
+  border-radius:12px;
+  grid-column: span 2;
+}
+.rect-1, .rect-4 { background: #ffc0cb; color: #800000; }
+.rect-2, .rect-5 { background: #fdf5e6; color: #b22222; }
+.rect-3, .rect-6, .rect-7 { background: #add8e6; color: #000080; }
+/* Last note centered */
+.notes-container > .note:last-child { grid-column: 1 / 3; width:50%; margin:auto; }
+/* Add pins */
+.note::before, .rect-note::before {
+  content:"";
+  width:14px;
+  height:14px;
+  background:#ff4d88;
+  border-radius:50%;
+  position:absolute;
+  top:-7px;
+  left:50%;
+  transform:translateX(-50%);
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+.rect-note:hover { transform: scale(1.05) rotate(2deg); }
+
+/* -------- POPUPS -------- */
+.popup, #photo-popup, #letter-popup {
+  display:none;
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  justify-content:center;
+  align-items:center;
+  z-index:5000;
+}
+.popup-content, .letter-box {
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  max-width:520px;
+  text-align:left;
+}
+.close, .close-btn, .love-letter-btn {
+  padding:12px 22px;
+  border:none;
+  background:#ff3e88;
+  color:white;
+  border-radius:10px;
+  margin-top:15px;
+  cursor:pointer;
+}
+#photo-popup {
+  background: rgba(0,0,0,0.7);
+}
+#photo-popup img {
+  max-width:90%;
+  max-height:90%;
+  border-radius:12px;
+}
+#letter-popup {
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+}
+
+/* -------- HEARTS (falling) -------- */
+.heart {
+  position: fixed;
+  top: -10px;
+  font-size:20px;
+  color:#ff4d7d;
+  animation: fall linear infinite;
+  opacity:0.8;
+  pointer-events:none;
+}
+@keyframes fall { 0% { transform: translateY(-20px); } 100% { transform: translateY(110vh); } }
+
+/* -------- TEXT ANIMATIONS -------- */
+.letter-box p { opacity:0; transform: translateY(20px); animation: fadeInText 1s forwards; }
+@keyframes fadeInText { to { opacity:1; transform: translateY(0); } }
+.popup-content { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity:0; transform: scale(0.9); } to { opacity:1; transform: scale(1); } }
+/* ---------- CALENDAR STYLING (MATCHED TO YOUR WEBSITE THEME) ---------- */
+
+#calendarContainer {
+  width: 320px;
+  margin: 20px auto;
+  background: rgba(255, 230, 235, 0.6);
+  border-radius: 20px;
+  padding: 15px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 20px rgba(255, 100, 120, 0.25);
+}
+
+#calendar {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Poppins", sans-serif;
+}
+
+#calendar th {
+  padding: 10px 0;
+  background: linear-gradient(45deg, #ff5f8a, #ff3f6c);
+  color: white;
+  font-weight: 600;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+#calendar td {
+  text-align: center;
+  padding: 10px 0;
+  font-size: 14px;
+  border-radius: 10px;
+  transition: 0.2s;
+  color: #333;
+  font-weight: 500;
+}
+
+#calendar td:hover {
+  background: rgba(255, 118, 144, 0.3);
+  cursor: pointer;
+}
+
+.today {
+  background: #ff5a7a;
+  color: white !important;
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(255, 70, 100, 0.4);
+}
+
+#calendar .empty {
+  background: transparent;
+}
+</style>
+<body>
+
+
+<!-- LOCK SCREEN -->
+<div id="lockScreen">
+  <h2>Enter Your Akash's Birthday 🎂</h2>
+  <p>Format: <b>DD-MM-YYYY</b></p>
+  <input type="text" id="dateInput" placeholder="DD-MM-YYYY" maxlength="10" autocomplete="off" inputmode="numeric" />
+  <button id="submitBtn">Submit</button>
+  <p id="error"></p>
+</div>
+
+<!-- SPLASH -->
+<div id="splash">
+  
+  <br><br><br>
+  <!-- CALENDAR -->
+<div id="calendarContainer">
+  <h3 id="welcomeText" style="
+    text-align:center;
+    color:#ff4da6;
+    font-weight:bold;
+    margin-bottom:10px;
+    font-size:18px;
+">
+  Welcome Saniya 💗
+</h3>
+  <table id="calendar">
+    <thead>
+      <tr>
+        <th colspan="7">December 2025</th>
+      </tr>
+      <tr>
+        <th>Sun</th>
+        <th>Mon</th>
+        <th>Tue</th>
+        <th>Wed</th>
+        <th>Thu</th>
+        <th>Fri</th>
+        <th>Sat</th>
+      </tr>
+    </thead>
+    <tbody id="calendarBody">
+      <!-- JS will populate dates here -->
+    </tbody>
+  </table>
+  <h3 id="daysLeftText" style="
+    text-align:center;
+    color:#ff2d78;  /* redish color */
+    font-weight:bold;
+    margin-top:10px;
+    font-size:16px;
+">
+</h3>
+</div>
+</div>
+
+<!-- BURST PLACEHOLDER -->
+<div id="burst"></div>
+
+<!-- MAIN CONTENT -->
+<div id="mainContent">
+<br><br>
+  <h3 class="typewriter">Some Things I Want to Tell You </h3>
+
+  <!-- MAIN PHOTO -->
+  <img src="horizontal.jpg" id="mainPhoto" alt="Our Photo">
+
+<!-- STICKY NOTES --> 
+<div class="notes-container">
+  <div class="note">happy birthay jaanmoni....  🌸</div>
+  <div class="note">the best day of my life is The day I proposed to you in 2021 ✨</div>
+  <div class="rect-note rect-1">A smile from you can make me smile, even on days i have no reason to.. ❤️</div>
+  <div class="rect-note rect-2"> the most important thing between us is the way we came back together.. 💞</div>
+  <div class="note"> you make my ordinary day feel special.. happy birthday darling 💖</div>
+  <div class="note">You are the one I love the most,, you feel like HOME to me... 💗</div>
+  <div class="note">Calling you Jaanmoni & darling makes me happy 😍</div>
+  <div class="note">Your cheeks turning red is the cutest thing i've ever seen in my life 😊</div>
+  <div class="note">I love our video call moments.. even if its small ✨</div>
+  <div class="note"> Even your anger feels peaceful, i could'nt stop falling for you.. 💕</div>
+  <div class="rect-note rect-3">Forever my love,, I LOVE YOU ❤️</div>
+  <div class="rect-note rect-4">Every little moment with you is magical, siply your existance make me more happy than any material things in the world 🌸</div>
+  <div class="rect-note rect-5">You complete me 💗, it feels like a pice of mine finally reunites </div>
+  <div class="note">Thank you for being my darling, i love you more than you can ever imagine 🤍</div>
+  <div class="note"> simply just by talking you make me smile even in worst ssitutations 😊</div>
+  <div class="rect-note rect-6">Always in my heart 💖 love for rimi-jimi </div>
+  <div class="rect-note rect-7">my happiness is you thanks for being my side... 💕</div>
+  <div class="note"> HAPPY BIRTHDAY TO MY MOST PRECIOUS PERSON IN THE WORLD  🌹</div>
+</div>
+  <!-- LOVE LETTER BUTTON -->
+  <div style="text-align:center; margin-top:14px;">
+    <button class="love-letter-btn" onclick="openLovePopup()">Read My Love Letter 💌</button>
+  </div>
+
+  <!-- VIEW MEMORIES BUTTON -->
+  <div style="text-align:center; margin-top:20px;">
+    <button onclick="location.href='gallery.html'"
+      style="padding: 12px 25px; font-size: 18px; background: #ff4d88; color:white; border:none; border-radius:12px;">
+      View Saniya's Gallery 💞
+    </button>
+    <br><br>
+  </div>
+</div>
+
+<!-- Love Letter Popup with Typewriter Effect -->
+<div id="lovePopup" class="popup">
+  <div class="popup-content">
+    <span class="close" onclick="closeLovePopup()">&times;</span>
+
+    <h2>💌 My Love Letter 💌</h2>
+
+    <div id="letterText" style="white-space:pre-wrap; font-size:16px; line-height:1.5; color:#333;"></div>
+
+    <h3 style="text-align:right; margin-top:20px;">— Akash ❤️</h3>
+  </div>
+</div>
+
+<!-- Photo popup (for main photo or sticky images) -->
+<div id="photo-popup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:5000;">
+  <img id="popupImg" style="max-width:90%; max-height:90%; border-radius:12px;" />
+</div>
+
+</body>
+
+<script>
+/* -------- Helper beep -------- */
+function playErrorBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.value = 520;
+    g.gain.value = 0.03;
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    setTimeout(()=> { o.frequency.value = 380; g.gain.value=0.02; }, 80);
+    setTimeout(()=> { o.stop(); ctx.close(); }, 220);
+  } catch(e){}
+}
+
+/* -------- Input auto-format -------- */
+const input = document.getElementById('dateInput');
+input.addEventListener('input', () => {
+  const raw = input.value.replace(/[^0-9]/g,'').slice(0,8);
+  let out = '';
+  if(raw.length >= 1) out += raw.slice(0, Math.min(2, raw.length));
+  if(raw.length > 2) out += '-' + raw.slice(2, Math.min(4, raw.length));
+  if(raw.length > 4) out += '-' + raw.slice(4, 8);
+  input.value = out;
+});
+input.addEventListener('paste', (e) => {
+  e.preventDefault();
+  const txt = (e.clipboardData || window.clipboardData).getData('text');
+  const digits = txt.replace(/[^0-9]/g,'').slice(0,8);
+  let out = '';
+  if(digits.length >= 2) out += digits.slice(0,2);
+  if(digits.length >= 4) out += '-' + digits.slice(2,4);
+  if(digits.length >=  8) out += '-' + digits.slice(4,8);
+  input.value = out;
+});
+
+/* -------- Date validation -------- */
+function isValidDate(dateString){
+  const regex = /^\d{2}-\d{2}-\d{4}$/;
+  if(!regex.test(dateString)) return false;
+  const [dd, mm, yyyy] = dateString.split('-').map(Number);
+  if(mm < 1 || mm > 12 || dd < 1 || dd > 31) return false;
+  const isLeap = (yyyy % 4 === 0 && yyyy % 100 !== 0) || (yyyy % 400 === 0);
+  const daysInMonth = [31, (isLeap?29:28), 31,30,31,30,31,31,30,31,30,31];
+  if(dd > daysInMonth[mm-1]) return false;
+  const entered = new Date(yyyy, mm-1, dd);
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(entered > today) return false;
+  return true;
+}
+
+/* -------- Show error -------- */
+function showError(msg){
+  const errorEl = document.getElementById('error');
+  errorEl.textContent = msg;
+  errorEl.style.display = 'block';
+  input.classList.add('shake');
+  playErrorBeep();
+  input.addEventListener('animationend', () => input.classList.remove('shake'), {once:true});
+}
+
+/* -------- Reveal all notes slowly -------- */
+function revealNotes() {
+  const notes = document.querySelectorAll('.note, .rect-note');
+  notes.forEach((n, i) => {
+    n.style.opacity = 0;
+    n.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      n.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+      n.style.opacity = 1;
+      n.style.transform = 'translateY(0)';
+    }, i * 1500); // 1.5s delay per note
+  });
+}
+
+/* -------- Check date & unlock -------- */
+const SUBMIT = document.getElementById('submitBtn');
+const CORRECT = '17-12-2006';
+SUBMIT.addEventListener('click', checkDate);
+input.addEventListener('keydown', (e) => { if(e.key==='Enter') checkDate(); });
+
+function checkDate(){
+  const value = input.value.trim();
+  const errorEl = document.getElementById('error');
+  const main = document.getElementById('mainContent');
+  if(!isValidDate(value)){
+    const formatRegex = /^\d{2}-\d{2}-\d{4}$/;
+    if(!formatRegex.test(value)) showError('❌ Invalid format. Use DD-MM-YYYY');
+    else showError('❌ Impossible date (check day/month).');
+    return;
+  }
+  if(value !== CORRECT){ showError('❌ Wrong birthday! Try again.'); return; }
+
+  // Unlock
+  errorEl.style.display = 'none';
+  document.getElementById('lockScreen').style.display = 'none';
+  document.getElementById('bgMusic').play().catch(()=>{});
+  heartBurst();
+
+  const splash = document.getElementById('splash');
+  splash.style.display = 'flex';
+  setTimeout(() => {
+    splash.style.display = 'none';
+    main.classList.add('visible');
+    document.querySelector('.typewriter').style.animationPlayState='running';
+    revealNotes();
+  }, 10000);
+}
+
+/* -------- Heart burst -------- */
+function heartBurst(){
+  const container = document.getElementById('burst');
+  const cx = window.innerWidth/2, cy = window.innerHeight/3, count = 28;
+  for(let i=0;i<count;i++){
+    const h = document.createElement('div');
+    h.className='heart'; h.innerHTML='💖';
+    h.style.left = cx+'px'; h.style.top = cy+'px'; h.style.fontSize = (16+Math.random()*20)+'px'; h.style.opacity = 1;
+    container.appendChild(h);
+    const angle = (i/count)*Math.PI*2;
+    const dist = 120 + Math.random()*160;
+    const dx = Math.cos(angle)*dist, dy = Math.sin(angle)*dist;
+    h.animate([{transform:'translate(0,0) scale(1)',opacity:1},
+               {transform:`translate(${dx}px,${dy}px) scale(0.8)`,opacity:0}],
+               {duration:1000+Math.random()*600,easing:'cubic-bezier(.2,.8,.2,1)'});
+    setTimeout(()=>h.remove(),1800);
+  }
+}
+
+/* -------- Falling hearts -------- */
+(function createFallingHearts(){
+  const total=18;
+  for(let i=0;i<total;i++){
+    setTimeout(()=>{
+      const h=document.createElement('div');
+      h.className='heart';
+      h.innerHTML=Math.random()>0.6?'💕':'💖';
+      h.style.left=Math.random()*window.innerWidth+'px';
+      h.style.fontSize=14+Math.random()*22+'px';
+      h.style.animationDuration=(5+Math.random()*6)+'s';
+      h.style.opacity=0.7+Math.random()*0.3;
+      document.body.appendChild(h);
+      setTimeout(()=>h.remove(),11000);
+    }, i*350);
+  }
+  setInterval(()=>{
+    const h=document.createElement('div');
+    h.className='heart';
+    h.innerHTML=Math.random()>0.6?'💕':'💖';
+    h.style.left=Math.random()*window.innerWidth+'px';
+    h.style.fontSize=12+Math.random()*22+'px';
+    h.style.animationDuration=(6+Math.random()*7)+'s';
+    h.style.opacity=0.6+Math.random()*0.4;
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),12000);
+  },900);
+})();
+
+/* -------- Notes click animation -------- */
+document.querySelectorAll('.note, .rect-note').forEach(note => {
+  note.style.position = 'relative';
+  // Random tilt
+  note.style.transform = `rotate(${(Math.random()*10-5)}deg)`;
+  note.addEventListener('click', () => {
+    note.animate(
+      [
+        { transform: 'scale(1) rotate(0deg)' },
+        { transform: 'scale(1.08) rotate(2deg)' },
+        { transform: 'scale(1) rotate(0deg)' }
+      ],
+      { duration: 300 }
+    );
+    const img = note.querySelector('img');
+    if(img){
+      const popup = document.getElementById('photo-popup');
+      const popupImg = document.getElementById('popupImg');
+      popupImg.src = img.src;
+      popup.style.display = 'flex';
+    }
+  });
+});
+
+/* -------- Photo popup click to close -------- */
+document.getElementById('photo-popup').addEventListener('click', ()=>{
+  document.getElementById('photo-popup').style.display = 'none';
+});
+
+/* -------- Main photo click to enlarge -------- */
+document.getElementById('mainPhoto').addEventListener('click', ()=>{
+  const popup = document.getElementById('photo-popup');
+  const popupImg = document.getElementById('popupImg');
+  popupImg.src = document.getElementById('mainPhoto').src;
+  popup.style.display = 'flex';
+});
+
+/* -------- Love Letter Popup with Typewriter -------- */
+const loveLetterText = `
+To Saniya,
+
+It still feels magical thinking about how we met after the breakup 🌸. I’ll never forget the day I proposed to you in 2021 in front of our school — your shy smile, your soft eyes, everything felt precious ✨. Even though we broke up once, the way we found our way back two years ago means more than words ❤️.
+
+You’re not my first, but you’re the one I love the most, the one I choose every day 💗. I love to call you Jaanmoni and darling, and the way your beautiful cheeks make you blush is the cutest thing ever 😍. I love the little things you do on video call, and even when you ignore my small things, I still love you the same.. i dont love you because its easy, i love you because even on the days i dont understand you, i still chose you.. im not perfect, and i wont pretend to be but my feelings for you is'nt temporary.. love is staying when things are'nt smooth.. when everything tries to keep us away.. even after all that staying togther is love.. I LOVE YOU DARLING,, AND RIMI-JIMI TOO  💕.
+`;
+
+let typewriterIndex = 0;
+let typewriterInterval;
+
+function openLovePopup(){
+  document.getElementById('lovePopup').style.display='flex';
+  document.getElementById('letterText').textContent='';
+  typewriterIndex=0;
+  typewriterInterval = setInterval(() => {
+    const textEl = document.getElementById('letterText');
+    textEl.textContent += loveLetterText[typewriterIndex];
+    typewriterIndex++;
+    if(typewriterIndex >= loveLetterText.length){
+      clearInterval(typewriterInterval);
+    }
+  }, 35); // typing speed
+}
+
+function closeLovePopup(){
+  document.getElementById('lovePopup').style.display='none';
+  clearInterval(typewriterInterval);
+  document.getElementById('letterText').textContent='';
+}
+
+/* -------- Clear error on input focus -------- */
+document.getElementById('dateInput').addEventListener('focus', ()=>{
+  document.getElementById('error').style.display = 'none';
+});
+
+function populateCalendar() {
+  const body = document.getElementById("calendarBody");
+  body.innerHTML = "";
+
+  const year = 2025, month = 11; // December is month 11
+  const firstDay = new Date(year, month, 1).getDay();
+  const days = new Date(year, month + 1, 0).getDate();
+
+  const today = new Date();
+
+  let day = 1;
+
+  for (let i = 0; i < 6; i++) {
+    let row = document.createElement("tr");
+    let hasDate = false;
+
+    for (let j = 0; j < 7; j++) {
+      let cell = document.createElement("td");
+
+      if (i === 0 && j < firstDay) {
+        cell.innerHTML = "";
+      } else if (day > days) {
+        cell.innerHTML = "";
+      } else {
+        hasDate = true;
+
+        // Sunday red
+        if (j === 0) cell.style.color = "red";
+
+        // 25 pink highlight
+        if (day === 25) {
+          cell.style.color = "#ff4d88";
+          cell.style.fontWeight = "bold";
+        }
+
+        // highlight ONLY the number 16 as birthday date
+if (day === 16) {
+
+  // if today is 16 Dec → red
+  if (
+    day === today.getDate() &&
+    month === today.getMonth() &&
+    year === today.getFullYear()
+  ) {
+    cell.style.color = "red";
+    cell.style.fontWeight = "bold";
+  } 
+  // otherwise → pink
+  else {
+    cell.style.color = "#ff4da6"; // pink
+    cell.style.fontWeight = "bold";
+  }
+
+  cell.innerHTML = day; // show only number 16
+}
+        
+        // all other dates
+        else {
+          cell.innerHTML = day;
+        }
+
+        day++;
+      }
+
+      row.appendChild(cell);
+    }
+
+    if (hasDate) body.appendChild(row); // no empty extra row
+
+  }
+}
+
+populateCalendar();
+function updateDaysLeft() {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+
+  // Birthday is 16 December
+  let birthday = new Date(currentYear, 11, 16); // month 11 = December
+
+  // If birthday already passed this year, use next year
+  if (today > birthday) {
+    birthday = new Date(currentYear + 1, 11, 16);
+  }
+
+  const diffTime = birthday - today; // in milliseconds
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  const daysTextEl = document.getElementById("daysLeftText");
+
+  if (diffDays === 0) {
+    daysTextEl.textContent = "🎉 Today is your birthday! 🎂❤️";
+    daysTextEl.style.color = "red";
+  } else if (diffDays === 1) {
+    daysTextEl.textContent = "1 day left until your birthday! 💗";
+    daysTextEl.style.color = "#ff4da6";
+  } else {
+    daysTextEl.textContent = `${diffDays} days left for your birthday! 💗`;
+    daysTextEl.style.color = "#ff4da6";
+  }
+}
+
+// call it after calendar populates
+updateDaysLeft();
+</script>
+
+</html>
