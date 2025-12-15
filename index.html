@@ -110,16 +110,11 @@ body {
 
 /* -------- MAIN CONTENT -------- */
 #mainContent {
-  opacity: 0;
   display: none;
-  transition: opacity .6s ease;
+  position: relative;
+  z-index: 5;
+  padding: 20px;
 }
-
-#mainContent.visible {
-  display: block;
-  opacity: 1;
-}
-
 /* -------- MAIN PHOTO -------- */
 #mainPhoto {
   display:block;
