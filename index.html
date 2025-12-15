@@ -109,8 +109,16 @@ body {
 @keyframes blink { 50% { border-color: transparent; } }
 
 /* -------- MAIN CONTENT -------- */
-#mainContent { opacity:0; transition: opacity .6s ease; }
-#mainContent.visible { opacity:1; }
+#mainContent {
+  opacity: 0;
+  display: none;
+  transition: opacity .6s ease;
+}
+
+#mainContent.visible {
+  display: block;
+  opacity: 1;
+}
 
 /* -------- MAIN PHOTO -------- */
 #mainPhoto {
